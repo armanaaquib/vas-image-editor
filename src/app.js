@@ -5,7 +5,6 @@ const redis = require('redis');
 
 const app = express();
 const client = redis.createClient({ db: 1 });
-let current_job_id = 1;
 
 app.use(fileUpload());
 app.use(express.urlencoded({ extended: true }));
@@ -17,7 +16,7 @@ const fsOptions = {
   method: 'POST',
 };
 
-const sendRequest = function (file) {
+const sendRequest = function (file, operation) {
   const job_id = current_job_id++;
   const options = {
     ...fsOptions,
@@ -30,15 +29,15 @@ const sendRequest = function (file) {
     res.on('data', (data) => {
       const fieldValues = [
         'pushed_at',
-        new Date().toString(),
+        JSON.stringify(new Date()),
         'status',
         'in_queue',
         'file_name',
         data.toString(),
       ];
 
-      client.hmset(`JOB_${job_id}`, fieldValues, () => {
-        client.rpush('resize_queue', `JOB_${job_id}`);
+      client.hmset(`job_${job_id}`, fieldValues, () => {
+        client.rpush(`${operation.toLowerCase()}_queue`, `job_${job_id}`);
       });
     });
   });
@@ -59,7 +58,7 @@ app.post('/edit', (req, res) => {
   req.files.file = [].concat(req.files.file);
   req.files.file.forEach((file) => {
     if (/image/.test(file.mimetype)) {
-      const job_id = sendRequest(file);
+      const job_id = sendRequest(file, req.body.operation);
       response.id.push(job_id);
     }
   });
@@ -68,11 +67,11 @@ app.post('/edit', (req, res) => {
 
 app.get('/status/:job_id', (req, res) => {
   const id = req.params.job_id;
-  client.hget(`JOB_${id}`, 'status', (err, status) => {
+  client.hget(`job_${id}`, 'status', (err, status) => {
     let path = '127.0.0.1:5000/';
 
     if (status == 'completed') {
-      client.hget(`JOB_${id}`, 'resulted_fileName', (err, file_name) => {
+      client.hget(`job_${id}`, 'resulted_fileName', (err, file_name) => {
         path += file_name;
         res.end(JSON.stringify({ status, path }));
       });
