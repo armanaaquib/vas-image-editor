@@ -17,36 +17,40 @@ const fsOptions = {
   method: 'POST',
 };
 
-const sendRequest = function (file, operation) {
+const sendRequest = function (file) {
   const job_id = current_job_id++;
-  const request = http.request(
-    {
-      ...fsOptions,
-      headers: {
-        'Content-type': file.mimetype,
-      },
+  const options = {
+    ...fsOptions,
+    headers: {
+      'Content-Type': file.mimetype,
     },
-    (res) => {
-      res.on('data', (data) => {
-        const fieldValues = [
-          'pushed_at',
-          new Date(),
-          'status',
-          'in_queue',
-          'file_name',
-          data.toString(),
-        ];
+  };
 
-        client.hmset(`JOB_${job_id}`, fieldValues, () => {
-          client.rpush('resize_queue', `JOB_${job_id}`);
-        });
+  const request = http.request(options, (res) => {
+    res.on('data', (data) => {
+      const fieldValues = [
+        'pushed_at',
+        new Date().toString(),
+        'status',
+        'in_queue',
+        'file_name',
+        data.toString(),
+      ];
+
+      client.hmset(`JOB_${job_id}`, fieldValues, () => {
+        client.rpush('resize_queue', `JOB_${job_id}`);
       });
-    }
-  );
+    });
+  });
 
   request.end(file.data);
   return job_id;
 };
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 app.get('/', (req, res) => {
   res.sendFile(`${__dirname}/index.html`);
@@ -57,7 +61,7 @@ app.post('/edit', (req, res) => {
   req.files.file = [].concat(req.files.file);
   req.files.file.forEach((file) => {
     if (/image/.test(file.mimetype)) {
-      const job_id = sendRequest(file, req.body.operation);
+      const job_id = sendRequest(file);
       response.id.push(job_id);
     }
   });
@@ -66,11 +70,13 @@ app.post('/edit', (req, res) => {
 
 app.get('/status/:job_id', (req, res) => {
   const id = req.params.job_id;
-  client.hget(`JOB_${id}`, 'status', (err, out) => {
-    (status = out), (path = null);
-    if (out == 'completed') {
-      client.hget(`JOB_${id}`, 'modified_name', (err, path) => {
-        res.end(JSON.stringify({ status: out, path }));
+  client.hget(`JOB_${id}`, 'status', (err, status) => {
+    let path = '127.0.0.1:5000/';
+
+    if (status == 'completed') {
+      client.hget(`JOB_${id}`, 'resulted_fileName', (err, file_name) => {
+        path += file_name;
+        res.end(JSON.stringify({ status, path }));
       });
     } else {
       res.end(JSON.stringify({ status, path }));
