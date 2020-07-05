@@ -5,6 +5,7 @@ const redis = require('redis');
 
 const app = express();
 const client = redis.createClient({ db: 1 });
+let current_job_id = 1;
 
 app.use(fileUpload());
 app.use(express.urlencoded({ extended: true }));
