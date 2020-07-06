@@ -10,35 +10,16 @@ const optionChange = function (option) {
   };
 };
 
-const download = function (links, fileNames) {
-  const statusBar = document.getElementById('status');
-  if (links.length == 0) {
-    statusBar.innerHTML = '<a href="/"> Please upload image file... </a>';
-    return;
-  }
-  let child = null;
-  while (child = statusBar.firstChild) {
-    child.remove();
-  }
-  for (each in links) {
-    const link = document.createElement('a');
-    link.href = `http://${links[each]}`;
-    link.innerText = `${fileNames[each]} - Download`;
-    statusBar.appendChild(link);
-    statusBar.appendChild(document.createElement('br'));
-    statusBar.appendChild(document.createElement('br'));
-  }
-};
+const getDownloadLink = function (link, fileName) {
+  return `<a href="${link}"> ${fileName} - Download </a>`;
+}
 
 const wait = function (id, fileNames) {
-  console.log(id, fileNames);
   document.getElementById('image').style.display = 'none';
-  let modified = 0,
-    links = [];
+  let modified = 0;
   const interval = setInterval(() => {
     if (modified == id.length) {
       clearInterval(interval);
-      download(links, fileNames);
     }
     for (let i in id) {
       const xhr = new XMLHttpRequest();
@@ -48,8 +29,8 @@ const wait = function (id, fileNames) {
         const res = JSON.parse(event.target.response);
         document.getElementById(`file-${i}`).innerText = `${fileNames[i]} - ${res.status}`;
         if (res.status == 'completed') {
+          document.getElementById(`file-${i}`).innerHTML = getDownloadLink(res.path, fileNames[i]);
           modified++;
-          links.push(res.path);
         }
       };
     }
@@ -57,16 +38,15 @@ const wait = function (id, fileNames) {
 };
 
 const getStatusBar = function (filename, index) {
-  console.log(filename, index);
   const status = document.createElement('p');
   status.id = `file-${index}`;
-  status.innerText = `${filename} - waiting`;
+  status.innerText = `${filename} - please wait`;
   return status;
 };
 
 const sendForm = function (form) {
   form.addEventListener('submit', () => {
-    event.preventDefault();
+    event.preventDefault(false);
     const upload = document.getElementById('upload');
     const newForm = new FormData(form);
     const fileNames = Array.from(upload.files).map((f) => f.name);
