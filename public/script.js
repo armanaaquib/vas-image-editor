@@ -13,6 +13,10 @@ const optionChange = function (option) {
 const download = function (links, fileNames) {
   document.getElementById('processing').firstElementChild.remove();
 
+  if (links.length == 0) {
+    document.getElementById('waiting').innerHTML = '<a href="/"> Please upload image file... </a>';
+    return;
+  }
   for (each in links) {
     const link = document.createElement('a');
     link.href = `http://${links[each]}`;
