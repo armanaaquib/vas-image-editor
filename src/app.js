@@ -29,7 +29,6 @@ app.post('/edit', async function (req, res) {
   for (file of req.files.file) {
     if (/image/.test(file.mimetype)) {
       const job_id = await sendRequest(file, req.body, client);
-      console.log(job_id);
       response.id.push(job_id);
     }
   };
