@@ -29,16 +29,16 @@ const sendRequest = function (file, operation) {
   const request = http.request(options, (res) => {
     res.on('data', (data) => {
       const fieldValues = [
-        'pushed_at',
+        'pushedAt',
         JSON.stringify(new Date()),
         'status',
-        'in_queue',
-        'file_name',
+        'inQueue',
+        'fileName',
         data.toString(),
       ];
 
       client.hmset(`job_${job_id}`, fieldValues, () => {
-        client.rpush(`${operation.toLowerCase()}_queue`, `job_${job_id}`);
+        client.rpush(`${operation.toLowerCase()}Queue`, `job_${job_id}`);
       });
     });
   });
@@ -66,13 +66,13 @@ app.post('/edit', (req, res) => {
   res.end(JSON.stringify(response));
 });
 
-app.get('/status/:job_id', (req, res) => {
-  const id = req.params.job_id;
+app.get('/status/:jobId', (req, res) => {
+  const id = req.params.jobId;
   client.hget(`job_${id}`, 'status', (err, status) => {
     let path = '127.0.0.1:5000/';
 
     if (status == 'completed') {
-      client.hget(`job_${id}`, 'resulted_fileName', (err, file_name) => {
+      client.hget(`job_${id}`, 'resultedFileName', (err, file_name) => {
         path += file_name;
         res.end(JSON.stringify({ status, path }));
       });
