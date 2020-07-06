@@ -11,21 +11,23 @@ const optionChange = function (option) {
 };
 
 const download = function (links, fileNames) {
-  document.getElementById('waiting').firstElementChild.remove();
+  document.getElementById('processing').firstElementChild.remove();
+
   for (each in links) {
     const link = document.createElement('a');
     link.href = `http://${links[each]}`;
     link.innerText = `${fileNames[each]} => Download`;
-    document.getElementById('waiting').appendChild(link);
+    document.getElementById('processing').appendChild(link);
     document
-      .getElementById('waiting')
+      .getElementById('processing')
       .appendChild(document.createElement('br'));
   }
 };
 
 const wait = function (id, fileNames) {
-  document.getElementById('waiting').style.display = 'block';
+  console.log(id, fileNames);
   document.getElementById('image').style.display = 'none';
+  document.getElementById('waiting').style.display = 'block';
   let modified = 0,
     links = [];
   const interval = setInterval(() => {
@@ -39,7 +41,18 @@ const wait = function (id, fileNames) {
       xhr.send();
       xhr.onload = function () {
         const res = JSON.parse(event.target.response);
+        if (res.status == 'inQueue') {
+          document.getElementById('waiting').style.display = 'block';
+        }
+
+        if (res.status == 'processing') {
+          document.getElementById('waiting').style.display = 'none';
+          document.getElementById('processing').style.display = 'block';
+        }
+
         if (res.status == 'completed') {
+          document.getElementById('waiting').style.display = 'none';
+          document.getElementById('processing').style.display = 'block';
           modified++;
           links.push(res.path);
         }

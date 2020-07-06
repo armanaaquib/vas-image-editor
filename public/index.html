@@ -12,7 +12,7 @@
   <body>
     <h1>EDIT IMAGE</h1>
     <form action="/edit" method="POST" id="image" enctype="multipart/form-data">
-      <input type="file" name="file" id="upload" multiple /> <br />
+      <input type="file" name="file" id="upload" multiple required/> <br />
       <br />
       Select Edit:
       <select name="operation" id="edit">
@@ -26,15 +26,20 @@
       </div>
       <div id="resizing">
         Height:
-        <input type="number" name="height" id="height" required /> Width:
-        <input type="number" name="width" id="width" required />
+        <input type="number" name="height" id="height"  /> Width:
+        <input type="number" name="width" id="width"  />
       </div>
       <br />
       <input type="submit" value="UPLOAD" />
     </form>
 
-    <div id="waiting" style="display: none;">
+    <div id="processing" style="display: none;">
       <p id="link">Please wait... Processing...</p>
     </div>
+
+    <div id="waiting" style="display: none;">
+      <p id="link">Please wait... Waiting...</p>
+    </div>
+
   </body>
 </html>

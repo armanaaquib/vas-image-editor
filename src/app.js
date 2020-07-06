@@ -19,9 +19,9 @@ const fsOptions = {
 
 const getOperationValues = function (operation, params) {
   if (operation == 'resize') {
-    return ['height', params['height'], 'width', params['width']]
+    return ['height', params.height, 'width', params.width];
   } else {
-    return ['angle', params['angle']];
+    return ['angle', params.angle];
   }
 };
 
@@ -43,7 +43,7 @@ const sendRequest = function (file, params) {
         'inQueue',
         'fileName',
         data.toString(),
-        ...getOperationValues(params.operation, params)
+        ...getOperationValues(params.operation, params),
       ];
 
       client.hmset(`job_${job_id}`, fieldValues, () => {
