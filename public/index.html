@@ -8,12 +8,10 @@
   <title>Document</title>
 </head>
 
-<script src="./script.js"></script>
-
 <body>
   <h1>EDIT IMAGE</h1>
   <form action="/edit" method="POST" id="image" enctype="multipart/form-data">
-    <input type="file" name="file" id="upload" multiple /> <br />
+    <input type="file" name="file" id="upload" multiple required /> <br />
     <br />
     Select Edit:
     <select name="operation" id="edit">
@@ -34,9 +32,14 @@
     <input type="submit" value="UPLOAD" />
   </form>
 
-  <div id="waiting" style="display: none;">
+  <div id="processing" style="display: none;">
     <p id="link">Please wait... Processing...</p>
   </div>
+
+  <div id="waiting" style="display: none;">
+    <p id="link">Please wait... Waiting...</p>
+  </div>
+
 </body>
 
 </html>
