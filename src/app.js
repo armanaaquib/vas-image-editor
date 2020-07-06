@@ -37,7 +37,7 @@ const sendRequest = function (file, params) {
   const request = http.request(options, (res) => {
     res.on('data', (data) => {
       const fieldValues = [
-        'pushedAt',
+        'receivedAt',
         JSON.stringify(new Date()),
         'status',
         'inQueue',
