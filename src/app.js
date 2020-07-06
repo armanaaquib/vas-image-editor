@@ -1,60 +1,20 @@
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const http = require('http');
 const redis = require('redis');
+const { sendRequest } = require('../lib/lib.js')
 
 const app = express();
 const client = redis.createClient({ db: 1 });
-let current_job_id = 1;
+
+client.setnx('job_id', 1, (err, out) => {
+  if (err) {
+    console.log("error: connecting to redis");
+    exit(1);
+  }
+});
 
 app.use(fileUpload());
 app.use(express.urlencoded({ extended: true }));
-
-const fsOptions = {
-  hostname: '127.0.0.1',
-  port: 5000,
-  path: '/save',
-  method: 'POST',
-};
-
-const getOperationValues = function (operation, params) {
-  if (operation == 'resize') {
-    return ['height', params['height'], 'width', params['width']]
-  } else {
-    return ['angle', params['angle']];
-  }
-};
-
-const sendRequest = function (file, params) {
-  const job_id = current_job_id++;
-  const options = {
-    ...fsOptions,
-    headers: {
-      'Content-Type': file.mimetype,
-    },
-  };
-
-  const request = http.request(options, (res) => {
-    res.on('data', (data) => {
-      const fieldValues = [
-        'receivedAt',
-        JSON.stringify(new Date()),
-        'status',
-        'inQueue',
-        'fileName',
-        data.toString(),
-        ...getOperationValues(params.operation, params)
-      ];
-
-      client.hmset(`job_${job_id}`, fieldValues, () => {
-        client.rpush(`${params.operation.toLowerCase()}Queue`, `job_${job_id}`);
-      });
-    });
-  });
-
-  request.end(file.data);
-  return job_id;
-};
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -63,15 +23,16 @@ app.use((req, res, next) => {
 
 app.use(express.static('public'));
 
-app.post('/edit', (req, res) => {
+app.post('/edit', async function (req, res) {
   const response = { id: [] };
   req.files.file = [].concat(req.files.file);
-  req.files.file.forEach((file) => {
+  for (file of req.files.file) {
     if (/image/.test(file.mimetype)) {
-      const job_id = sendRequest(file, req.body);
+      const job_id = await sendRequest(file, req.body, client);
+      console.log(job_id);
       response.id.push(job_id);
     }
-  });
+  };
   res.end(JSON.stringify(response));
 });
 

@@ -1,40 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
-  </head>
 
-  <script src="./script.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Document</title>
+</head>
 
-  <body>
-    <h1>EDIT IMAGE</h1>
-    <form action="/edit" method="POST" id="image" enctype="multipart/form-data">
-      <input type="file" name="file" id="upload" multiple /> <br />
-      <br />
-      Select Edit:
-      <select name="operation" id="edit">
-        <option value="resize"> Resize </option>
-        <option value="rotate"> Rotate </option>
-      </select>
-      <br />
-      <br />
-      <div id="rotation" style="display: none;">
-        Angle (In degrees): <input type="number" name="angle" id="angle" />
-      </div>
-      <div id="resizing">
-        Height:
-        <input type="number" name="height" id="height" required /> Width:
-        <input type="number" name="width" id="width" required />
-      </div>
-      <br />
-      <input type="submit" value="UPLOAD" />
-    </form>
+<script src="./script.js"></script>
 
-    <div id="waiting" style="display: none;">
-      <p id="link">Please wait... Processing...</p>
+<body>
+  <h1>EDIT IMAGE</h1>
+  <form action="/edit" method="POST" id="image" enctype="multipart/form-data">
+    <input type="file" name="file" id="upload" multiple /> <br />
+    <br />
+    Select Edit:
+    <select name="operation" id="edit">
+      <option value="resize"> Resize </option>
+      <option value="rotate"> Rotate </option>
+    </select>
+    <br />
+    <br />
+    <div id="rotation" style="display: none;">
+      Angle (In degrees): <input type="number" name="angle" id="angle" />
     </div>
-  </body>
+    <div id="resizing">
+      Height:
+      <input type="number" name="height" id="height" /> Width:
+      <input type="number" name="width" id="width" />
+    </div>
+    <br />
+    <input type="submit" value="UPLOAD" />
+  </form>
+
+  <div id="waiting" style="display: none;">
+    <p id="link">Please wait... Processing...</p>
+  </div>
+</body>
+
 </html>
