@@ -17,7 +17,15 @@ const fsOptions = {
   method: 'POST',
 };
 
-const sendRequest = function (file, operation) {
+const getOperationValues = function (operation, params) {
+  if (operation == 'resize') {
+    return ['height', params['height'], 'width', params['width']]
+  } else {
+    return ['angle', params['angle']];
+  }
+};
+
+const sendRequest = function (file, params) {
   const job_id = current_job_id++;
   const options = {
     ...fsOptions,
@@ -35,10 +43,11 @@ const sendRequest = function (file, operation) {
         'inQueue',
         'fileName',
         data.toString(),
+        ...getOperationValues(params.operation, params)
       ];
 
       client.hmset(`job_${job_id}`, fieldValues, () => {
-        client.rpush(`${operation.toLowerCase()}Queue`, `job_${job_id}`);
+        client.rpush(`${params.operation.toLowerCase()}Queue`, `job_${job_id}`);
       });
     });
   });
@@ -59,7 +68,7 @@ app.post('/edit', (req, res) => {
   req.files.file = [].concat(req.files.file);
   req.files.file.forEach((file) => {
     if (/image/.test(file.mimetype)) {
-      const job_id = sendRequest(file, req.body.operation);
+      const job_id = sendRequest(file, req.body);
       response.id.push(job_id);
     }
   });
