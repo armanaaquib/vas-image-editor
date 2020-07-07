@@ -18,23 +18,20 @@ const wait = function (id, fileNames) {
   document.getElementById('image').style.display = 'none';
   let modified = 0;
   const interval = setInterval(() => {
-    if (modified == id.length) {
+    if (modified === id.length) {
       clearInterval(interval);
     }
+    modified = 0;
     for (let i in id) {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', `/status/${id[i]}`);
       xhr.send();
       xhr.onload = function () {
         const res = JSON.parse(event.target.response);
-        document.getElementById(
-          `file-${i}`
-        ).innerText = `${fileNames[i]} - ${res.status}`;
+        console.log(res.status, i);
+        document.getElementById(`file-${i}`).innerText = `${fileNames[i]} - ${res.status}`;
         if (res.status == 'completed') {
-          document.getElementById(`file-${i}`).innerHTML = getDownloadLink(
-            res.path,
-            fileNames[i]
-          );
+          document.getElementById(`file-${i}`).innerHTML = getDownloadLink(res.path, fileNames[i]);
           modified++;
         }
       };
