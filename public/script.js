@@ -11,8 +11,8 @@ const optionChange = function (option) {
 };
 
 const getDownloadLink = function (link, fileName) {
-  return `<a href="${link}"> ${fileName} - Download </a>`;
-}
+  return `<a href="http://${link}"> ${fileName} - Download </a>`;
+};
 
 const wait = function (id, fileNames) {
   document.getElementById('image').style.display = 'none';
@@ -27,9 +27,14 @@ const wait = function (id, fileNames) {
       xhr.send();
       xhr.onload = function () {
         const res = JSON.parse(event.target.response);
-        document.getElementById(`file-${i}`).innerText = `${fileNames[i]} - ${res.status}`;
+        document.getElementById(
+          `file-${i}`
+        ).innerText = `${fileNames[i]} - ${res.status}`;
         if (res.status == 'completed') {
-          document.getElementById(`file-${i}`).innerHTML = getDownloadLink(res.path, fileNames[i]);
+          document.getElementById(`file-${i}`).innerHTML = getDownloadLink(
+            res.path,
+            fileNames[i]
+          );
           modified++;
         }
       };
